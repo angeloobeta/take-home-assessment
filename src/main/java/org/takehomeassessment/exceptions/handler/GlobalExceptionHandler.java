@@ -3,7 +3,7 @@ package org.takehomeassessment.exceptions.handler;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.interswitch.blacklistingsystem.exceptions.*;
+import org.takehomeassessment.exceptions.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -22,11 +22,11 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(BlackListException.class)
-    public ResponseEntity<BlackListExceptionResponse> apiRequestExceptionHandler(BlackListException e) {
+    @ExceptionHandler(WhatsAppCloneServe.class)
+    public ResponseEntity<WhatsAppExceptionResponse> apiRequestExceptionHandler(WhatsAppCloneServe e) {
         log.info(e.getMessage());
-        BlackListExceptionResponse response =
-                BlackListExceptionResponse.builder()
+        WhatsAppExceptionResponse response =
+                WhatsAppExceptionResponse.builder()
                         .message(e.getMessage())
                         .status(e.getStatus())
                         .build();
@@ -48,7 +48,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
         var response =
-                BlackListExceptionResponse.builder()
+                WhatsAppExceptionResponse.builder()
                         .data(data)
                         .message("Bad Request")
                         .status(status)

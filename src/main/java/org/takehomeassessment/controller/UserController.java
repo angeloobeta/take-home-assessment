@@ -7,10 +7,11 @@ import lombok.RequiredArgsConstructor;
 import org.takehomeassessment.data.dtos.payload.UserDto;
 import org.takehomeassessment.services.user.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/user/")
@@ -56,15 +57,19 @@ public class UserController {
     }
 
 
-    @Operation(summary = "Update A Particular User's profile picture",
-            description = "Returns an ApiResponse Response entity containing the operation details")
-    @PatchMapping(value = "/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadProfilePicture(@RequestParam(value = "file") MultipartFile file) {
+    @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
+    @Operation(summary = "Upload file to the server",
+            description = "Returns an ApiResponse Response entity containing successful message of the uploaded file with details")
+    public ResponseEntity<?> uploadFile(
+            @RequestPart("file")
+            @RequestParam(value="fileName") MultipartFile[] fileName) {
+        if (fileName[0].isEmpty()) {
+            return ResponseEntity.status(HttpStatus.OK).body("You must select a file!");
+        }
         try {
-            String response = userService.uploadProfileImage(file);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }catch (Exception exception){
-            return ResponseEntity.badRequest().body(exception.getMessage());
+            return ResponseEntity.status(HttpStatus.CREATED).body(userService.uploadFiles(fileName));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

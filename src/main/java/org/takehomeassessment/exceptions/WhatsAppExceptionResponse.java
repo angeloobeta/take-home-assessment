@@ -12,7 +12,7 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BlackListExceptionResponse {
+public class WhatsAppExceptionResponse {
 
     private Map<String, String> data;
     private String message;
