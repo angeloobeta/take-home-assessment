@@ -17,16 +17,14 @@ public interface UserService {
 
     ApiResponseDto<?> createUser(UserSignupDto signUpRequest);
 
-    ApiResponseDto<?> searchByNameOrEmail(String keyword);
-
-    String uploadFile(MultipartFile file);
     ApiResponseDto<List<FileResponseDto>> uploadFiles(MultipartFile[] file) throws IOException;
 
     ApiResponseDto<?> getUserDetails();
 
     ApiResponseDto<UserDto> getLoggedInUser();
 
-    ApiResponseDto<Optional<File>> findVideoById(String fileId);
+    ApiResponseDto<?> findFileById(String fileId);
+    ApiResponseDto<?> getUserByNameOrPhoneNumber(String query);
 
     ApiResponseDto<?> getAllUser();
 

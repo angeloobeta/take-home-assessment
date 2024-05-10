@@ -20,11 +20,8 @@ public class UserDto {
 
     private String lastName;
 
-    private String email;
 
     private String phone;
-
-    private String refreshToken;
 
     private LocalDateTime updatedAt;
 

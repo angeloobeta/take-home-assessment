@@ -36,10 +36,17 @@ public class UserController {
     }
 
     @Operation(summary = "Search for users",
-            description = "You can search by first name, last name, or both names, or email")
+            description = "You can search by first name, last name, or both names, or phoneNumber")
     @GetMapping("all-users")
     public ResponseEntity<?> searchForUsers(@RequestParam("keyword") String keyword){
-        return ResponseEntity.ok(userService.searchByNameOrEmail(keyword));
+        return ResponseEntity.ok(userService.getUserByNameOrPhoneNumber(keyword));
+    }
+
+    @Operation(summary = "Search for file by Id",
+            description = "You can search for file by id")
+    @GetMapping("all-users")
+    public ResponseEntity<?> searchForFileById(@RequestParam("keyword") String keyword){
+        return ResponseEntity.ok(userService.findFileById(keyword));
     }
 
     @Operation(summary = "Get all users in the database",

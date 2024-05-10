@@ -20,7 +20,6 @@ public class UserUtils {
     public UserDto mapUserToDto(User user){
         return UserDto.builder()
                 .id(user.getId())
-                .email(user.getEmail())
                 .phone(user.getPhoneNumber())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())

@@ -11,9 +11,11 @@ import java.util.Optional;
 public interface FileRepository extends JpaRepository<File, String> {
 
     // Custom query to find videos by filename
-    List<File> findByFilename(String fileName);
+    List<File> findByFileName(String fileName);
+    List<File> findByFileSize(String fileSize);
     // Custom query to find videos uploaded after a certain timestamp
-    Optional<File> findVideoById(String id);
+    Optional<File> findByFileIdOrFileName(String id);
+    Optional<File> findByFileId(String id);
 
 }
 

@@ -11,7 +11,6 @@ import org.takehomeassessment.data.entities.File;
 import org.takehomeassessment.data.entities.User;
 import org.takehomeassessment.data.repositories.FileRepository;
 import org.takehomeassessment.data.repositories.UserRepository;
-import org.takehomeassessment.services.cloud.CloudService;
 import org.takehomeassessment.utils.UserUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -32,13 +31,12 @@ public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
     private final UserUtils userUtils;
-    private final CloudService cloudService;
     private final FileRepository fileRepository;
 
     @Override
     public ApiResponseDto<?> createUser(UserSignupDto signUpRequest) {
         // check if user has already signed up
-        boolean isExists = checkIfUserAlreadyExists(signUpRequest.getEmail());
+        boolean isExists = checkIfUserAlreadyExists(signUpRequest.getPhoneNumber());
         if (isExists){
             return new ApiResponseDto<>("User already exists", HttpStatus.BAD_REQUEST.value(),null);
         }
@@ -46,27 +44,12 @@ public class UserServiceImpl implements UserService{
         User user = new User();
         user.setFirstName(signUpRequest.getFirstName());
         user.setLastName(signUpRequest.getLastName());
-        user.setEmail(signUpRequest.getEmail());
+        user.setPhoneNumber(signUpRequest.getPhoneNumber());
         return new ApiResponseDto<>();
     }
 
-    private boolean checkIfUserAlreadyExists(String email) {
-
-        return userRepository.findByEmail(email).isPresent();
-    }
-
-    @Override
-    public ApiResponseDto<?> searchByNameOrEmail(String keyword){
-        return new ApiResponseDto<>("Users Fetched Successfully", 200, null);
-    }
-
-    @Override
-    public String uploadFile(MultipartFile fileUpload) {
-        User foundUser = userUtils.getLoggedInUser();
-        String fileUrl = cloudService.upload(fileUpload);
-        foundUser.setProfilePic(fileUrl);
-        userRepository.save(foundUser);
-        return fileUrl;
+    private boolean checkIfUserAlreadyExists(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber).isPresent();
     }
 
     @Override
@@ -77,7 +60,7 @@ public class UserServiceImpl implements UserService{
         }
 
         UsersResponseDto userResponseDto = UsersResponseDto.builder()
-                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
                 .fullName(user.getFirstName() + user.getLastName())
                 .build();
 
@@ -92,30 +75,30 @@ public class UserServiceImpl implements UserService{
 
     public ApiResponseDto<List<FileResponseDto>> uploadFiles(MultipartFile[] UploadedFiles) throws IOException {
         List<FileResponseDto> fileResponseDtoList = new ArrayList<>();
-        String savedVideoFilePath = null;
+        String savedFilePath = null;
 
         // Save video to disk
         for(MultipartFile multipartFile : UploadedFiles){
             System.out.println("Uploading : "+ multipartFile.getOriginalFilename() + "to the server ");
             try {
-                savedVideoFilePath = saveFileToDisk(multipartFile.getInputStream(), multipartFile.getOriginalFilename());
+                savedFilePath = saveFileToDisk(multipartFile.getInputStream(), multipartFile.getOriginalFilename());
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("An Error occurred while writing video file to disk");
             }
 
             // Generate a unique filename for the video
-            assert savedVideoFilePath != null;
-            String uploadedFileUrl = StringUtils.cleanPath(savedVideoFilePath);
+            assert savedFilePath != null;
+            String uploadedFileUrl = StringUtils.cleanPath(savedFilePath);
 
             // Save the file metadata to the database
-            File videoData = File.builder()
+            File fileData = File.builder()
                     .fileSize(String.valueOf(multipartFile.getSize()))
                     .fileName(multipartFile.getOriginalFilename())
                     .timeStamp(LocalDateTime.now())
                     .fileUrl(uploadedFileUrl)
                     .build();
-            File fileUploaded = fileRepository.save(videoData);
+            File fileUploaded = fileRepository.save(fileData);
             FileResponseDto fileResponseDto = FileResponseDto.builder()
                     .fileUrl(fileUploaded.getFileUrl())
                     .fileId(String.valueOf(fileUploaded.getFileId()))
@@ -132,11 +115,11 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public ApiResponseDto<Optional<File>> findVideoById(String fileId) {
+    public ApiResponseDto<Optional<File>> findFileById(String fileId) {
 
-        if(fileRepository.findVideoById(fileId).isPresent())
+        if(fileRepository.findByFileId(fileId).isPresent())
         {
-            return new ApiResponseDto<>("Success", 200, fileRepository.findVideoById(fileId));
+            return new ApiResponseDto<>("Success", 200, fileRepository.findByFileId(fileId));
         }else {
             return new ApiResponseDto<>("Video doesn't exist", 200, null);
         }
@@ -147,6 +130,23 @@ public class UserServiceImpl implements UserService{
 //                .fileName(response.getFilename())
 //                .timeStamp(response.getTimestamp())
 //                .build();
+    }
+
+    @Override
+    public ApiResponseDto<?> getUserByNameOrPhoneNumber(String keyword) {
+        User fetchedDetail = userRepository.findAllByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainsIgnoreCase(keyword, keyword, keyword)
+            .stream()
+            .findFirst()
+            .orElse(null);
+        assert fetchedDetail != null;
+        UserDto userDto = UserDto.builder()
+                .phone(fetchedDetail.getPhoneNumber())
+                .firstName(fetchedDetail.getFirstName())
+                .lastName(fetchedDetail.getLastName())
+                .profilePic(fetchedDetail.getProfilePic())
+                .build();
+
+        return new ApiResponseDto<>("User fetched successfully", 200, userDto);
     }
 
     @Override

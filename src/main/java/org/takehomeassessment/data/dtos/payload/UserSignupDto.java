@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSignupDto {
-    @NotBlank(message = "email is required")
-    private String email;
+    @NotBlank(message = "phone number is required")
+    private String phoneNumber;
     @NotBlank(message = "password is required")
     private String password;
     @NotBlank(message = "first is required")
