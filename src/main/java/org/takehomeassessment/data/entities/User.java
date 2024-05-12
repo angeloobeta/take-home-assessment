@@ -28,6 +28,7 @@ public class User {
     private String firstName;
 
     private String lastName;
+    private boolean isVerified;
 
     private LocalDateTime updatedAt = LocalDateTime.now();
 

@@ -14,4 +14,5 @@ public class UsersResponseDto {
     private Long id;
     private String phoneNumber;
     private String fullName;
+    private boolean isVerified;
 }

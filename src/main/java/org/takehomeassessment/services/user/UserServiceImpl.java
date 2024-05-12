@@ -1,6 +1,8 @@
 package org.takehomeassessment.services.user;
 
 import lombok.RequiredArgsConstructor;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
 import org.springframework.util.StringUtils;
 import org.takehomeassessment.data.dtos.payload.UserDto;
 import org.takehomeassessment.data.dtos.payload.UserSignupDto;
@@ -11,6 +13,7 @@ import org.takehomeassessment.data.entities.File;
 import org.takehomeassessment.data.entities.User;
 import org.takehomeassessment.data.repositories.FileRepository;
 import org.takehomeassessment.data.repositories.UserRepository;
+import org.takehomeassessment.utils.TwilloUtils;
 import org.takehomeassessment.utils.UserUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -32,24 +35,35 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final UserUtils userUtils;
     private final FileRepository fileRepository;
+    private final TwilloUtils twilloUtils;
 
     @Override
     public ApiResponseDto<?> createUser(UserSignupDto signUpRequest) {
         // check if user has already signed up
         boolean isExists = checkIfUserAlreadyExists(signUpRequest.getPhoneNumber());
-        if (isExists){
-            return new ApiResponseDto<>("User already exists", HttpStatus.BAD_REQUEST.value(),null);
+        if (isExists ){
+            User userDetail = new User();
+            boolean isVerified = isUserVerified(userDetail.isVerified());
+            if(isVerified){
+                return new ApiResponseDto<>("User with this phone number is verified and already exists", HttpStatus.BAD_REQUEST.value(),null);
+            }
+            return new ApiResponseDto<>("User already exists but has been verified", HttpStatus.BAD_REQUEST.value(),null);
         }
         // create new user
         User user = new User();
         user.setFirstName(signUpRequest.getFirstName());
         user.setLastName(signUpRequest.getLastName());
         user.setPhoneNumber(signUpRequest.getPhoneNumber());
+
         return new ApiResponseDto<>();
     }
 
     private boolean checkIfUserAlreadyExists(String phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber).isPresent();
+    }
+
+    private boolean isUserVerified(boolean isVerified){
+        return userRepository.findByVerifiedIsTrue(isVerified);
     }
 
     @Override
@@ -152,5 +166,18 @@ public class UserServiceImpl implements UserService{
     @Override
     public ApiResponseDto<?> getAllUser() {
         return null;
+    }
+
+    @Override
+    public ApiResponseDto<?> sendVerificationByPhoneNumber(String phoneNumber) {
+        Message.creator(new PhoneNumber(phoneNumber),
+                new PhoneNumber("+2347047524735"), "Verification code sent from Twilio 📞").create();
+        return null;
+    }
+
+    @Override
+    public ApiResponseDto<?> verifyPhoneNumber(String phoneNumber, String code) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'verifyPhoneNumber'");
     }
 }

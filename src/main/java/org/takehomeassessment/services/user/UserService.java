@@ -28,4 +28,6 @@ public interface UserService {
 
     ApiResponseDto<?> getAllUser();
 
+    ApiResponseDto<?> sendVerificationByPhoneNumber(String phoneNumber);
+
 }

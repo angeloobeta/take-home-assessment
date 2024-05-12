@@ -16,8 +16,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findAllByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainsIgnoreCase(String keyword, String keyword1, String keyword2);
 
-    boolean existsByEmail(String email);
     boolean existByPhoneNumber(String phoneNumber);
+
+    boolean findByVerifiedIsTrue(boolean isVerified);
 
 
 }
