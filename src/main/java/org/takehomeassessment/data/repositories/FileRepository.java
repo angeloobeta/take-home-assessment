@@ -14,7 +14,6 @@ public interface FileRepository extends JpaRepository<File, String> {
     List<File> findByFileName(String fileName);
     List<File> findByFileSize(String fileSize);
     // Custom query to find videos uploaded after a certain timestamp
-    Optional<File> findByFileIdOrFileName(String id);
     Optional<File> findByFileId(String id);
 
 }

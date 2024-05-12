@@ -6,11 +6,9 @@ import org.takehomeassessment.data.dtos.payload.UserSignupDto;
 import org.takehomeassessment.data.dtos.response.ApiResponseDto;
 import org.springframework.web.multipart.MultipartFile;
 import org.takehomeassessment.data.dtos.response.FileResponseDto;
-import org.takehomeassessment.data.entities.File;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
     // TODO: CREATE USER
@@ -27,7 +25,4 @@ public interface UserService {
     ApiResponseDto<?> getUserByNameOrPhoneNumber(String query);
 
     ApiResponseDto<?> getAllUser();
-
-    ApiResponseDto<?> sendVerificationByPhoneNumber(String phoneNumber);
-
 }

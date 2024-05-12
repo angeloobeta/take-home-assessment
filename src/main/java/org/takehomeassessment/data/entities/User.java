@@ -28,7 +28,8 @@ public class User {
     private String firstName;
 
     private String lastName;
-    private boolean isVerified;
+    @Column(name = "verified")
+    private boolean verified;
 
     private LocalDateTime updatedAt = LocalDateTime.now();
 

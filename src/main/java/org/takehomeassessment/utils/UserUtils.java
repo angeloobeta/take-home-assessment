@@ -13,7 +13,7 @@ public class UserUtils {
     private final UserRepository userRepository;
     public User getLoggedInUser(){
 
-        return userRepository.findByEmail("To be filled")
+        return userRepository.findByPhoneNumber("To be filled")
                 .orElseThrow(()-> new UserNotFoundException("User with email does not exists"));
     }
 

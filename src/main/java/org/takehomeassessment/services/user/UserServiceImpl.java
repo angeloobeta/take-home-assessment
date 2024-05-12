@@ -1,8 +1,6 @@
 package org.takehomeassessment.services.user;
 
 import lombok.RequiredArgsConstructor;
-import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.type.PhoneNumber;
 import org.springframework.util.StringUtils;
 import org.takehomeassessment.data.dtos.payload.UserDto;
 import org.takehomeassessment.data.dtos.payload.UserSignupDto;
@@ -13,7 +11,7 @@ import org.takehomeassessment.data.entities.File;
 import org.takehomeassessment.data.entities.User;
 import org.takehomeassessment.data.repositories.FileRepository;
 import org.takehomeassessment.data.repositories.UserRepository;
-import org.takehomeassessment.utils.TwilloUtils;
+import org.takehomeassessment.utils.TwilioUtils;
 import org.takehomeassessment.utils.UserUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,7 +33,7 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final UserUtils userUtils;
     private final FileRepository fileRepository;
-    private final TwilloUtils twilloUtils;
+    private final TwilioUtils twilioUtils;
 
     @Override
     public ApiResponseDto<?> createUser(UserSignupDto signUpRequest) {
@@ -55,6 +53,8 @@ public class UserServiceImpl implements UserService{
         user.setLastName(signUpRequest.getLastName());
         user.setPhoneNumber(signUpRequest.getPhoneNumber());
 
+        // send verification code
+
         return new ApiResponseDto<>();
     }
 
@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService{
     }
 
     private boolean isUserVerified(boolean isVerified){
-        return userRepository.findByVerifiedIsTrue(isVerified);
+        return userRepository.findByVerified(isVerified);
     }
 
     @Override
@@ -148,7 +148,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public ApiResponseDto<?> getUserByNameOrPhoneNumber(String keyword) {
-        User fetchedDetail = userRepository.findAllByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainsIgnoreCase(keyword, keyword, keyword)
+        User fetchedDetail = userRepository.findAllByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrPhoneNumberContainsIgnoreCase(keyword, keyword, keyword)
             .stream()
             .findFirst()
             .orElse(null);
@@ -168,16 +168,4 @@ public class UserServiceImpl implements UserService{
         return null;
     }
 
-    @Override
-    public ApiResponseDto<?> sendVerificationByPhoneNumber(String phoneNumber) {
-        Message.creator(new PhoneNumber(phoneNumber),
-                new PhoneNumber("+2347047524735"), "Verification code sent from Twilio 📞").create();
-        return null;
-    }
-
-    @Override
-    public ApiResponseDto<?> verifyPhoneNumber(String phoneNumber, String code) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'verifyPhoneNumber'");
-    }
 }
