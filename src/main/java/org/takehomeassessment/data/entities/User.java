@@ -1,10 +1,7 @@
 package org.takehomeassessment.data.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -28,8 +25,11 @@ public class User {
     private String firstName;
 
     private String lastName;
-    @Column(name = "verified")
-    private boolean verified;
+
+    private boolean verified = false;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Otp otp;
 
     private LocalDateTime updatedAt = LocalDateTime.now();
 

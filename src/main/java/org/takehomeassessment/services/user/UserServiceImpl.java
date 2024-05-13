@@ -2,14 +2,18 @@ package org.takehomeassessment.services.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
+import org.takehomeassessment.data.dtos.payload.OtpRequestDto;
 import org.takehomeassessment.data.dtos.payload.UserDto;
 import org.takehomeassessment.data.dtos.payload.UserSignupDto;
 import org.takehomeassessment.data.dtos.response.ApiResponseDto;
 import org.takehomeassessment.data.dtos.response.FileResponseDto;
+import org.takehomeassessment.data.dtos.response.OtpResponseDto;
 import org.takehomeassessment.data.dtos.response.UsersResponseDto;
 import org.takehomeassessment.data.entities.File;
+import org.takehomeassessment.data.entities.Otp;
 import org.takehomeassessment.data.entities.User;
 import org.takehomeassessment.data.repositories.FileRepository;
+import org.takehomeassessment.data.repositories.OtpRepository;
 import org.takehomeassessment.data.repositories.UserRepository;
 import org.takehomeassessment.utils.TwilioUtils;
 import org.takehomeassessment.utils.UserUtils;
@@ -31,6 +35,7 @@ import static org.takehomeassessment.utils.FileUtils.saveFileToDisk;
 public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
+    private final OtpRepository otpRepository;
     private final UserUtils userUtils;
     private final FileRepository fileRepository;
     private final TwilioUtils twilioUtils;
@@ -48,14 +53,35 @@ public class UserServiceImpl implements UserService{
             return new ApiResponseDto<>("User already exists but has been verified", HttpStatus.BAD_REQUEST.value(),null);
         }
         // create new user
+        String sentOtpCode = twilioUtils.generateVerificationCode();
+        // set the otp payload
+
+        Otp otp = new Otp();
+        otp.setPhoneNumber(signUpRequest.getPhoneNumber());
+        otp.setOtpCode(sentOtpCode);
+        // persist the otp data
+        Otp otpRequestDto  = otpRepository.save(otp);
+        OtpRequestDto otpResponseDto = OtpRequestDto.builder()
+                .phoneNumber(otpRequestDto.getPhoneNumber())
+                .build();
+        // send the otp verification code
+        twilioUtils.sendVerificationCode(otpResponseDto,sentOtpCode);
         User user = new User();
+        user.setOtp(otp);
         user.setFirstName(signUpRequest.getFirstName());
         user.setLastName(signUpRequest.getLastName());
         user.setPhoneNumber(signUpRequest.getPhoneNumber());
 
-        // send verification code
+        // persist the user data
+        userRepository.save(user);
 
-        return new ApiResponseDto<>();
+        UsersResponseDto usersResponseDto = UsersResponseDto.builder()
+                .isVerified(user.isVerified())
+                .fullName(user.getFirstName() + " " + user.getLastName())
+                .phoneNumber(user.getPhoneNumber())
+                .build();
+
+        return new ApiResponseDto<>("User successfully created", HttpStatus.CREATED.value(), usersResponseDto);
     }
 
     private boolean checkIfUserAlreadyExists(String phoneNumber) {
