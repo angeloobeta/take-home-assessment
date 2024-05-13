@@ -6,9 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.extern.slf4j.Slf4j;
-import org.takehomeassessment.data.dtos.payload.OtpRequestDto;
 import org.takehomeassessment.data.dtos.payload.OtpValidationRequest;
-import org.takehomeassessment.data.dtos.response.OtpResponseDto;
 import org.takehomeassessment.services.sms.OtpServices;
 
 @RestController
